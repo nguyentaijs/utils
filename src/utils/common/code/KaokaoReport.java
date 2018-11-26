@@ -12,7 +12,7 @@ import java.util.GregorianCalendar;
 import java.util.Scanner;
 
 import utils.common.utils.ConsoleIOManager;
-import utils.common.utils.FixedValues;
+import utils.common.utils.Constants;
 
 public class KaokaoReport {
 
@@ -41,7 +41,7 @@ public class KaokaoReport {
 		try {
 			// 0. Show list files
 			ConsoleIOManager.showMessage("LIST LOG FILES");
-			File[] listLogFiles =  new File(FixedValues.Common.KAKAO_FOLDER).listFiles();
+			File[] listLogFiles =  new File(Constants.Common.KAKAO_FOLDER).listFiles();
 			for (int i = 0; i < listLogFiles.length; i++) {
 				if (!listLogFiles[i].isDirectory()) {
 					System.out.println(listLogFiles[i].getName());
@@ -53,7 +53,7 @@ public class KaokaoReport {
 			int targetMonth = ConsoleIOManager.nextInt("SELECT MONTH", "Input month that you want to export data", scanner);
 			
 			// 2. Doc file
-			reader = new BufferedReader(new InputStreamReader(new FileInputStream(FixedValues.Common.KAKAO_FOLDER + File.separator + selectedLogFile)));
+			reader = new BufferedReader(new InputStreamReader(new FileInputStream(Constants.Common.KAKAO_FOLDER + File.separator + selectedLogFile)));
 			String logLine = "";
 			GregorianCalendar startCal = new GregorianCalendar(2018, targetMonth - 2, 23);
 			Date startDate = startCal.getTime();

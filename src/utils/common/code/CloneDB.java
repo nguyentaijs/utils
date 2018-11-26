@@ -6,7 +6,7 @@ import java.util.Scanner;
 import org.apache.commons.lang3.StringUtils;
 
 import utils.common.utils.ConsoleIOManager;
-import utils.common.utils.FixedValues;
+import utils.common.utils.Constants;
 import utils.common.utils.ProcessManager;
 
 public class CloneDB {
@@ -60,13 +60,13 @@ public class CloneDB {
 			scanner = new Scanner(System.in);
 			
 			// 0.1: Clone remote server?
-			String cloneRemoteServer = ConsoleIOManager.nextLine("CLONE REMOTE SERVER?", FixedValues.Message.YES_INPUT, scanner);
+			String cloneRemoteServer = ConsoleIOManager.nextLine("CLONE REMOTE SERVER?", Constants.Message.YES_INPUT, scanner);
 			
 			if (!cloneRemoteServer.isEmpty() && StringUtils.equalsIgnoreCase("Y", cloneRemoteServer)) {
 				bCloneRemoteServer = true;
 				System.out.println(">>> YES");
 				ConsoleIOManager.showMessage(String.format("DEFAULT REMOTE >>> HOST: %s, USER: %s, PASSWORD: %s",
-															FixedValues.REMOTE_HOST, FixedValues.LOCAL_USER, FixedValues.REMOTE_PASSWORD));
+															Constants.REMOTE_HOST, Constants.LOCAL_USER, Constants.REMOTE_PASSWORD));
 			} else {
 				bCloneRemoteServer = false;
 				System.out.println(">>> NO");
@@ -75,10 +75,10 @@ public class CloneDB {
 			// 1.1. Read user input target db name
 			if (bCloneRemoteServer) {
 				command = String.format("cmd.exe /c mysql -h %s -u %s -p%s -e \"SHOW DATABASES\"",
-										FixedValues.REMOTE_HOST, FixedValues.LOCAL_USER, FixedValues.REMOTE_PASSWORD);
+										Constants.REMOTE_HOST, Constants.LOCAL_USER, Constants.REMOTE_PASSWORD);
 			} else {
 				command = String.format("cmd.exe /c mysql -h %s -u %s -p%s -e \"SHOW DATABASES\"",
-						FixedValues.LOCAL_HOST, FixedValues.LOCAL_USER, FixedValues.LOCAL_PASSWORD);
+						Constants.LOCAL_HOST, Constants.LOCAL_USER, Constants.LOCAL_PASSWORD);
 			}
 			exitValue = ProcessManager.processCommand("DB LIST (PICK ONE)", command, System.out);
 			if (exitValue != 0) {
@@ -92,7 +92,7 @@ public class CloneDB {
 			}
 			// 2. Create DB
 			command = String.format("cmd.exe /c mysql -u %s -p%s -e \"CREATE DATABASE %s /*!40100 COLLATE 'utf8_general_ci' */\"",
-									FixedValues.LOCAL_USER, FixedValues.LOCAL_PASSWORD, newdbName);
+									Constants.LOCAL_USER, Constants.LOCAL_PASSWORD, newdbName);
 			exitValue = ProcessManager.processCommand("CREATE DB", command, null);
 			if (exitValue != 0) {
 				return;
@@ -100,12 +100,12 @@ public class CloneDB {
 			// 3. Clone DB
 			if (bCloneRemoteServer) {
 				command = String.format("cmd.exe /c mysqldump -h %s -u %s -p%s %s | mysql -u %s -p%s %s",
-										FixedValues.REMOTE_HOST, FixedValues.REMOTE_USER, FixedValues.REMOTE_PASSWORD, targetDBName,
-										FixedValues.LOCAL_USER, FixedValues.LOCAL_PASSWORD, newdbName);
+										Constants.REMOTE_HOST, Constants.REMOTE_USER, Constants.REMOTE_PASSWORD, targetDBName,
+										Constants.LOCAL_USER, Constants.LOCAL_PASSWORD, newdbName);
 			} else {
 				command = String.format("cmd.exe /c mysqldump -h %s -u %s -p%s %s | mysql -u %s -p%s %s",
-										FixedValues.LOCAL_HOST, FixedValues.LOCAL_USER, FixedValues.LOCAL_PASSWORD, targetDBName,
-										FixedValues.LOCAL_USER, FixedValues.LOCAL_PASSWORD, newdbName);
+										Constants.LOCAL_HOST, Constants.LOCAL_USER, Constants.LOCAL_PASSWORD, targetDBName,
+										Constants.LOCAL_USER, Constants.LOCAL_PASSWORD, newdbName);
 			}
 			exitValue = ProcessManager.processCommand(String.format("CLONE %s >>> %s", targetDBName, newdbName), command, System.out);
 			

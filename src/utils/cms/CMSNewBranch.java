@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import utils.common.code.CloneDB;
 import utils.common.utils.ConsoleIOManager;
 import utils.common.utils.FileManager;
-import utils.common.utils.FixedValues;
+import utils.common.utils.Constants;
 
 public class CMSNewBranch {
 	
@@ -54,7 +54,7 @@ public class CMSNewBranch {
 			} while (!hasInput);
 			// 2. Create Directories
 			// 2.1. Check issue folder items
-			File issueDirectory = new File(FixedValues.CMS.BRANCHES_FOLDER);
+			File issueDirectory = new File(Constants.CMS.BRANCHES_FOLDER);
 			File[] subDirectories = issueDirectory.listFiles(new FileFilter() {
 					@Override
 					public boolean accept(File pathname) {
@@ -66,7 +66,7 @@ public class CMSNewBranch {
 			int maxIndex = FileManager.getMaxIndex(subDirectories);
 			String fullBranchName = FileManager.setDirectoryName(maxIndex, inputBranchName);
 			// E:\Document\03_Branches\000_branchName
-			String fullBranchPath = String.format("%s%s%s", FixedValues.CMS.BRANCHES_FOLDER, File.separator, fullBranchName);
+			String fullBranchPath = String.format("%s%s%s", Constants.CMS.BRANCHES_FOLDER, File.separator, fullBranchName);
 			System.out.println(String.format("NEW BRANCH NAME: %s", fullBranchName));
 			
 			// E:\Document\03_Branches\000_branchName\01_References
@@ -78,13 +78,13 @@ public class CMSNewBranch {
 			// E:\Document\03_Branches\000_branchName\04_TestInput
 			createSubDirectory(fullBranchPath, TEST_INPUT);
 			// E:\Tool\tomcat7\conf\cms-config\000_branchName
-			String configDirectory = createSubDirectory(FixedValues.CMS.CONFIG_FOLDER, fullBranchName);
+			String configDirectory = createSubDirectory(Constants.CMS.CONFIG_FOLDER, fullBranchName);
 			
 			// E:\Document\03_Branches\000_branchName\Note_000_branchName.txt
 			createNoteFile(fullBranchPath, fullBranchName);
 			
 			// 3. Clone DB?
-			inputBranchName = ConsoleIOManager.nextLine("CLONE DATABASE?", FixedValues.Message.NO_INPUT, scanner);
+			inputBranchName = ConsoleIOManager.nextLine("CLONE DATABASE?", Constants.Message.NO_INPUT, scanner);
 			boolean bCloneDB = true;
 			if (!inputBranchName.isEmpty() && StringUtils.equalsIgnoreCase("N", inputBranchName)) {
 				bCloneDB = false;
