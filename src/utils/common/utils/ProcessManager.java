@@ -21,7 +21,7 @@ public class ProcessManager {
 	 * @return exit value của @param command
 	 */
 	public static int processCommand(String commandName, String command, OutputStream os) {
-		ConsoleIOManager.showMessage(commandName);
+		ConsoleIO.showMessage(commandName);
 		int exitValue = runCommand(command, os);
 		if (exitValue != 0) {
 			System.err.println(String.format("%s FAILED !!! EXITVALUE = %d", commandName, exitValue));			

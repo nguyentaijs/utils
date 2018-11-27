@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Scanner;
 
-import utils.common.utils.ConsoleIOManager;
+import utils.common.utils.ConsoleIO;
 import utils.common.utils.Constants;
 
 public class KaokaoReport {
@@ -40,17 +40,17 @@ public class KaokaoReport {
 		
 		try {
 			// 0. Show list files
-			ConsoleIOManager.showMessage("LIST LOG FILES");
+			ConsoleIO.showMessage("LIST LOG FILES");
 			File[] listLogFiles =  new File(Constants.Common.KAKAO_FOLDER).listFiles();
 			for (int i = 0; i < listLogFiles.length; i++) {
 				if (!listLogFiles[i].isDirectory()) {
 					System.out.println(listLogFiles[i].getName());
 				}
 			}
-			String selectedLogFile = ConsoleIOManager.nextLineLoop("SELECT LOG FILES", "Pick one", "NO FILE SELECTED", scanner);
+			String selectedLogFile = ConsoleIO.nextLineExpectInput("SELECT LOG FILES", scanner);
 			
 			// 1. Xac dinh thoi diem bat dau, thoi diem ket thuc
-			int targetMonth = ConsoleIOManager.nextInt("SELECT MONTH", "Input month that you want to export data", scanner);
+			int targetMonth = ConsoleIO.nextInt("SELECT MONTH", "Input month that you want to export data", scanner);
 			
 			// 2. Doc file
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(Constants.Common.KAKAO_FOLDER + File.separator + selectedLogFile)));

@@ -13,11 +13,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import utils.common.code.CloneDB;
-import utils.common.utils.ConsoleIOManager;
+import utils.common.utils.ConsoleIO;
 import utils.common.utils.FileManager;
 import utils.common.utils.Constants;
 
-public class CMSNewBranch {
+public class CMS_NewBranch {
 	
 	private static final String REFERENCES_DIR = "01_References";
 	private static final String DB_SCRIPT = "02_DBScript";
@@ -33,18 +33,23 @@ public class CMSNewBranch {
 	private static final String NOTE_TEMPLATE_BRANCHNAME = "_branchName";
 	private static final String NOTE_TEMPLATE_DATECREATED = "_dateCreated";
 	
-	
 	public static void main(String[] args) {
+		run();
+		ConsoleIO.showMessage("FINISH EXECUTION :)");
+		System.exit(0);
+	}
+	
+	public static void run() {
 		Scanner scanner = null;
 		String inputBranchName = "";
 		try {
 			scanner = new Scanner(System.in);
 			// 1. Initialize Structure
-			CMSInitializeStructure.run();
+			CMS_InitializeStructure.run();
 			
 			boolean hasInput = false;
 			do {
-				inputBranchName = ConsoleIOManager.nextLine("CREATE BRANCH DIRECTORIES AND SUB DIRECTORIES", "INPUT NEW BRANCH NAME", scanner);
+				inputBranchName = ConsoleIO.nextLine("CREATE BRANCH DIRECTORIES AND SUB DIRECTORIES", "INPUT NEW BRANCH NAME", scanner);
 				if (inputBranchName.isEmpty()) {
 					System.err.println("NO BRANCH NAME >>> RE INPUT");
 					hasInput = false;
@@ -62,7 +67,7 @@ public class CMSNewBranch {
 					}
 			});
 			// 2.2. Create branch folder
-			ConsoleIOManager.showMessage("CREATE BRANCH DIRECTORIES AND SUB DIRECTORIES");
+			ConsoleIO.showMessage("CREATE BRANCH DIRECTORIES AND SUB DIRECTORIES");
 			int maxIndex = FileManager.getMaxIndex(subDirectories);
 			String fullBranchName = FileManager.setDirectoryName(maxIndex, inputBranchName);
 			// E:\Document\03_Branches\000_branchName
@@ -84,7 +89,7 @@ public class CMSNewBranch {
 			createNoteFile(fullBranchPath, fullBranchName);
 			
 			// 3. Clone DB?
-			inputBranchName = ConsoleIOManager.nextLine("CLONE DATABASE?", Constants.Message.NO_INPUT, scanner);
+			inputBranchName = ConsoleIO.nextLine("CLONE DATABASE?", Constants.Message.NO_INPUT, scanner);
 			boolean bCloneDB = true;
 			if (!inputBranchName.isEmpty() && StringUtils.equalsIgnoreCase("N", inputBranchName)) {
 				bCloneDB = false;
@@ -109,9 +114,6 @@ public class CMSNewBranch {
 				scanner.close();
 			}
 		}
-		
-		ConsoleIOManager.showMessage("FINISH EXECUTION :)");
-		System.exit(0);
 	}
 	
 	private static String createSubDirectory(String path, String directoryName) {
@@ -134,7 +136,7 @@ public class CMSNewBranch {
 			destPath = String.format("%s%s%s", configDirectory, File.separator, JDBC_AUTO_GEN_FILE);
 		}
 		
-		String sourcePath = CMSNewBranch.class.getClassLoader().getResource(JDBC_TEMPLATE).getPath();
+		String sourcePath = CMS_NewBranch.class.getClassLoader().getResource(JDBC_TEMPLATE).getPath();
 		FileManager.modifyFile(sourcePath, destPath, JDBC_TEMPLATE_DBNAME, dbName);
 		System.out.println(String.format("Create JDBC configuration file: %s", destPath));
 		return destPath;
@@ -142,7 +144,7 @@ public class CMSNewBranch {
 	
 	private static String createNoteFile(String fullBranchPath, String fullBranchName) {
 		String notePath = String.format("%s%s%s_%s.txt", fullBranchPath, File.separator, NOTE_TXT_PREFIX, fullBranchName);
-		String sourcePath = CMSNewBranch.class.getClassLoader().getResource(NOTE_TEMPLATE).getPath();
+		String sourcePath = CMS_NewBranch.class.getClassLoader().getResource(NOTE_TEMPLATE).getPath();
 		Date currentDate = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 		String currentDateString = sdf.format(currentDate);

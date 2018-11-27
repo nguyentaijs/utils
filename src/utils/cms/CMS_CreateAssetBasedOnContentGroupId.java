@@ -11,29 +11,67 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
-import utils.common.utils.ConsoleIOManager;
+import utils.common.utils.ConsoleIO;
 import utils.common.utils.Constants;
+import utils.common.utils.DBManager;
 
-public class CMSCreateAssetBasedOnContentGroupId {
+public class CMS_CreateAssetBasedOnContentGroupId {
 	
-	private static final String DB_NAME = "cms_1_12_testbed_subtitle";
-
 	public static void main(String[] args) {
 		run();
-		ConsoleIOManager.showMessage("FINISH EXECUTION :)");
+		ConsoleIO.showMessage("FINISH EXECUTION :)");
 		System.exit(0);
 	}
 
-	private static void run() {
+	public static void run() {
 		Scanner scanner = new Scanner(System.in);
 		File fileInput = null;
+		boolean isRemoteServer = false;
+		int exitValue = Integer.MIN_VALUE;
+		String sourcedbName = "";
 		try {
-			String contentGroupId = ConsoleIOManager.nextLine("INPUT CONTENT GROUP ID", "DO NOT LEAVE EMPTY", scanner); 
-			ResultSet filePathResultSet = getFilePathBasedOnContentGroupId(contentGroupId);
+			
+			// 0.1: Remote server?
+			String cloneRemoteServer = ConsoleIO.nextLine("USING REMOTE SERVER?", Constants.Message.YES_INPUT, scanner);
+
+			if ( StringUtils.equalsIgnoreCase("Y", cloneRemoteServer)) {
+				isRemoteServer = true;
+				ConsoleIO.showMessage(String.format("DEFAULT REMOTE >>> HOST: %s, USER: %s, PASSWORD: %s",
+						Constants.REMOTE_HOST, Constants.LOCAL_USER, Constants.REMOTE_PASSWORD));
+			} else {
+				isRemoteServer = false;
+			}
+
+			// 1.1. Read user input target db name
+			if (isRemoteServer) {
+				exitValue = DBManager.showDB(Constants.REMOTE_HOST, Constants.LOCAL_USER, Constants.REMOTE_PASSWORD);
+			} else {
+				exitValue = DBManager.showDB(Constants.LOCAL_HOST, Constants.LOCAL_USER, Constants.LOCAL_PASSWORD);
+			}
+			if (exitValue != 0) {
+				return;
+			}
+
+			sourcedbName = ConsoleIO.nextLineExpectInput("INPUT SOURCE DATABASE NAME", scanner);
+			
+			String contentGroupId = ConsoleIO.nextLineExpectInput("INPUT CONTENT GROUP ID", scanner);
+			ResultSet filePathResultSet = null;
+			if (isRemoteServer) {
+				filePathResultSet = getFilePathBasedOnContentGroupId(Constants.REMOTE_HOST, Constants.REMOTE_USER, Constants.REMOTE_PASSWORD,
+																		sourcedbName, contentGroupId);
+			} else {
+				filePathResultSet = getFilePathBasedOnContentGroupId(Constants.LOCAL_HOST, Constants.LOCAL_USER, Constants.LOCAL_PASSWORD,
+																		sourcedbName, contentGroupId);
+			}
 			List<String> filePathList = new ArrayList<>();
 			while (filePathResultSet.next()) {
 				filePathList.add(filePathResultSet.getString(1));
+			}
+			
+			if (filePathList.size() <= 0) {
+				System.out.println("No asset for content group " + contentGroupId);
 			}
 			
 			for (String filePath : filePathList) {
@@ -52,9 +90,9 @@ public class CMSCreateAssetBasedOnContentGroupId {
 		}
 	}
 	
-	private static ResultSet getFilePathBasedOnContentGroupId(String contentGroupId) throws SQLException, ClassNotFoundException {
+	private static ResultSet getFilePathBasedOnContentGroupId(String host, String user, String password, String sourceDbName, String contentGroupId) throws SQLException, ClassNotFoundException {
 		Class.forName("com.mysql.jdbc.Driver");
-		Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + DB_NAME, Constants.LOCAL_USER, Constants.LOCAL_PASSWORD);
+		Connection con = DriverManager.getConnection(String.format("jdbc:mysql://%s:3306/%s", host, sourceDbName), user, password);
 		Statement statement = con.createStatement();
 		
 		StringBuilder queryBuilder = new StringBuilder();

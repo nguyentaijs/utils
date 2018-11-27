@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
-import utils.common.utils.ConsoleIOManager;
+import utils.common.utils.ConsoleIO;
 import utils.common.utils.Constants;
 
 public class CommonInitializeStructure {
@@ -15,7 +15,7 @@ public class CommonInitializeStructure {
 	}
 	
 	public static void run() throws IOException {
-		ConsoleIOManager.showMessage("CREATE ROOT DIRECTORIES IF NOT EXISTS");
+		ConsoleIO.showMessage("CREATE ROOT DIRECTORIES IF NOT EXISTS");
 		makeDirectory(Constants.Common.KAKAO_FOLDER);
 	}
 	

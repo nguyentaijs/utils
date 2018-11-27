@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
-import utils.common.utils.ConsoleIOManager;
+import utils.common.utils.ConsoleIO;
 import utils.common.utils.Constants;
 
 public class BMSInitializeStructure {
@@ -15,7 +15,7 @@ public class BMSInitializeStructure {
 	}
 	
 	public static void run() throws IOException {
-		ConsoleIOManager.showMessage("CREATE ROOT DIRECTORIES IF NOT EXISTS");
+		ConsoleIO.showMessage("CREATE ROOT DIRECTORIES IF NOT EXISTS");
 		makeDirectory(Constants.BMS.BRANCHES_FOLDER);
 		makeDirectory(Constants.BMS.RELEASES_FOLDER);
 		makeDirectory(Constants.BMS.INPUT_FOLDER);
