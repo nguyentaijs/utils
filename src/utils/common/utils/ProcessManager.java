@@ -24,7 +24,7 @@ public class ProcessManager {
 		ConsoleIO.showMessage(commandName);
 		int exitValue = runCommand(command, os);
 		if (exitValue != 0) {
-			System.err.println(String.format("%s FAILED !!! EXITVALUE = %d", commandName, exitValue));			
+			System.err.println(String.format("%s FAILED !!! EXITVALUE = %d", commandName, exitValue));
 		}
 		return exitValue;
 	}

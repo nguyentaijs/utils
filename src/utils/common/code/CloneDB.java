@@ -55,6 +55,9 @@ public class CloneDB {
 		String sourcedbName = "";
 		boolean bCloneRemoteServer = false;
 		int exitValue = Integer.MIN_VALUE;
+		String sourceHost = "";
+		String sourceUser = "";
+		String sourcePasword = "";
 		
 		try {
 			scanner = new Scanner(System.in);
@@ -72,10 +75,15 @@ public class CloneDB {
 			
 			// 1.1. Read user input target db name
 			if (bCloneRemoteServer) {
-				exitValue = DBManager.showDB(Constants.REMOTE_HOST, Constants.LOCAL_USER, Constants.REMOTE_PASSWORD);
+				sourceHost = Constants.REMOTE_HOST;
+				sourceUser = Constants.REMOTE_USER;
+				sourcePasword = Constants.REMOTE_PASSWORD;
 			} else {
-				exitValue = DBManager.showDB(Constants.LOCAL_HOST, Constants.LOCAL_USER, Constants.LOCAL_PASSWORD);
+				sourceHost = Constants.LOCAL_HOST;
+				sourceUser = Constants.LOCAL_USER;
+				sourcePasword = Constants.LOCAL_PASSWORD;
 			}
+			exitValue = DBManager.showDB(sourceHost, sourceUser, sourcePasword);
 			if (exitValue != 0) {
 				return;
 			}
@@ -83,17 +91,42 @@ public class CloneDB {
 			sourcedbName = ConsoleIO.nextLineExpectInput("INPUT SOURCE DATABASE NAME", scanner);
 			
 			// 2. Create DB
+			// 2.1. Local DB
 			exitValue = DBManager.createDB(Constants.LOCAL_HOST, Constants.LOCAL_USER, Constants.LOCAL_PASSWORD, newdbName);
+			
 			if (exitValue != 0) {
+				System.out.println(String.format("[ERROR] Failed to create local DB: %s - %s", Constants.LOCAL_HOST, newdbName));
 				return;
+			} else {
+				System.out.println(String.format("Created local DB: %s - %s", Constants.LOCAL_HOST, newdbName));
+			}
+			// 2.2. Remote DB
+			exitValue = DBManager.createDB(Constants.REMOTE_HOST, Constants.REMOTE_USER, Constants.REMOTE_PASSWORD, newdbName);
+			
+			if (exitValue != 0) {
+				System.out.println(String.format("[ERROR] Failed to create remote DB: %s - %s", Constants.REMOTE_HOST, newdbName));
+				return;
+			} else {
+				System.out.println(String.format("Created remote DB: %s - %s", Constants.REMOTE_HOST, newdbName));
 			}
 			// 3. Clone DB
-			if (bCloneRemoteServer) {
-				exitValue = DBManager.cloneDB(Constants.REMOTE_HOST, Constants.REMOTE_USER, Constants.REMOTE_PASSWORD, sourcedbName,
-											  Constants.LOCAL_HOST, Constants.LOCAL_USER, Constants.LOCAL_PASSWORD, newdbName);
+			// 3.1. Local DB
+			exitValue = DBManager.cloneDB(sourceHost, sourceUser, sourcePasword, sourcedbName,
+										Constants.LOCAL_HOST, Constants.LOCAL_USER, Constants.LOCAL_PASSWORD, newdbName);
+			
+			if (exitValue != 0) {
+				System.out.println(String.format("[ERROR] Failed to clone local DB: %s - %s", Constants.LOCAL_HOST, newdbName));
 			} else {
-				exitValue = DBManager.cloneDB(Constants.LOCAL_HOST, Constants.LOCAL_USER, Constants.LOCAL_PASSWORD, sourcedbName,
-						  Constants.LOCAL_HOST, Constants.LOCAL_USER, Constants.LOCAL_PASSWORD, newdbName);
+				System.out.println(String.format("Clone local DB succesful: %s - %s", Constants.LOCAL_HOST, newdbName));
+			}
+			// 3.2. Remote DB
+			exitValue = DBManager.cloneDB(sourceHost, sourceUser, sourcePasword, sourcedbName,
+										Constants.REMOTE_HOST, Constants.REMOTE_USER, Constants.REMOTE_PASSWORD, newdbName);
+			
+			if (exitValue != 0) {
+				System.out.println(String.format("[ERROR] Failed to clone remote DB: %s - %s", Constants.REMOTE_HOST, newdbName));
+			} else {
+				System.out.println(String.format("Clone remote DB succesful: %s - %s", Constants.REMOTE_HOST, newdbName));;
 			}
 			
 		} catch (Exception e) {

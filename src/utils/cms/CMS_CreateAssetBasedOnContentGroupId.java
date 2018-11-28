@@ -77,10 +77,14 @@ public class CMS_CreateAssetBasedOnContentGroupId {
 			for (String filePath : filePathList) {
 				fileInput = new File(filePath);
 				FileUtils.forceMkdirParent(fileInput);
-				if (fileInput.createNewFile()) {
-					System.out.println("Created file: " + fileInput.getAbsolutePath());
+				if (fileInput.exists()) {
+					System.out.println("File already exists: " + fileInput.getAbsolutePath());
 				} else {
-					System.out.println("Cannot create file: " + fileInput.getAbsolutePath());
+					if (fileInput.createNewFile()) {
+						System.out.println("Created file: " + fileInput.getAbsolutePath());
+					} else {
+						System.out.println("Cannot create file: " + fileInput.getAbsolutePath());
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -96,17 +100,25 @@ public class CMS_CreateAssetBasedOnContentGroupId {
 		Statement statement = con.createStatement();
 		
 		StringBuilder queryBuilder = new StringBuilder();
-		queryBuilder.append(" SELECT asset.fileName                                                             ");
-		queryBuilder.append(" FROM contentgroup AS contentgrp JOIN contentsubset AS subset                      ");
-		queryBuilder.append(" ON contentgrp.movieSubsetId = subset.contentSubsetId                              ");
-		queryBuilder.append(" OR contentgrp.subtitleSubsetId = subset.contentSubsetId                           ");
-		queryBuilder.append(" OR contentgrp.previewSubsetId = subset.contentSubsetId                            ");
-		queryBuilder.append(" OR contentgrp.posterSubsetId = subset.contentSubsetId                             ");
-		queryBuilder.append(" OR contentgrp.thumbnailSubsetId = subset.contentSubsetId                          ");
-		queryBuilder.append(" JOIN contentasset AS asset ON subset.contentSubsetId = asset.contentSubsetId      ");
-		queryBuilder.append(" WHERE 1                                                                           ");
-		queryBuilder.append(" AND contentgrp.contentGroupId = %s                                                ");
+		queryBuilder.append(" SELECT asset.fileName                                                                    ");
+		queryBuilder.append(" FROM contentgroup AS contentgrp JOIN contentsubset AS subset                             ");
+		queryBuilder.append(" ON contentgrp.movieSubsetId = subset.contentSubsetId                                     ");
+		queryBuilder.append(" OR contentgrp.subtitleSubsetId = subset.contentSubsetId                                  ");
+		queryBuilder.append(" OR contentgrp.previewSubsetId = subset.contentSubsetId                                   ");
+		queryBuilder.append(" OR contentgrp.posterSubsetId = subset.contentSubsetId                                    ");
+		queryBuilder.append(" OR contentgrp.thumbnailSubsetId = subset.contentSubsetId                                 ");
+		queryBuilder.append(" JOIN contentasset AS asset ON subset.contentSubsetId = asset.contentSubsetId             ");
+		queryBuilder.append(" WHERE 1                                                                                  ");
+		queryBuilder.append(" AND contentgrp.contentGroupId = %s                                                       ");
+		queryBuilder.append(" UNION                                                                                    ");
+		queryBuilder.append(" SELECT asset.fileName                                                                    ");
+		queryBuilder.append(" FROM contentgroup AS contentgrp JOIN postergroup AS postergrp                            ");
+		queryBuilder.append(" ON contentgrp.contentGroupId = postergrp.contentGroupId                                  ");
+		queryBuilder.append(" JOIN contentsubset AS subset ON subset.contentSubsetId = postergrp.posterSubsetId        ");
+		queryBuilder.append(" JOIN contentasset AS asset ON subset.contentSubsetId = asset.contentSubsetId             ");
+		queryBuilder.append(" WHERE 1                                                                                  ");
+		queryBuilder.append(" AND contentgrp.contentGroupId = %s                                                       ");
 		
-		return statement.executeQuery(String.format(queryBuilder.toString(), contentGroupId));
+		return statement.executeQuery(String.format(queryBuilder.toString(), contentGroupId, contentGroupId));
 	}
 }

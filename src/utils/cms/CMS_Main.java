@@ -11,11 +11,11 @@ public class CMS_Main {
 		String commandInput = "";
 		try {
 			String[] commands = new String[] {
-					"Exit",
-					"Initialize Structure",
-					"Create new branch",
-					"Create asset based on Content Group Id",
-					"Create asset by user input PATH & File Name"
+					"0. Exit",
+					"1. Initialize Structure",
+					"2. Create new branch",
+					"3. Create asset based on Content Group Id",
+					"4. Create asset by user input PATH & File Name"
 			};
 			
 			showMenu(commands);
@@ -54,7 +54,7 @@ public class CMS_Main {
 	private static void showMenu(String[] commands) {
 		ConsoleIO.showMessage("MENU");
 		for (int i = 0; i < commands.length; i++) {
-			System.out.println(String.format("%2d. %s", i, commands[i]));
+			System.out.println(commands[i]);
 		}
 	}
 }
