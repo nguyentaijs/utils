@@ -47,16 +47,8 @@ public class CMS_NewBranch {
 			// 1. Initialize Structure
 			CMS_InitializeStructure.run();
 			
-			boolean hasInput = false;
-			do {
-				inputBranchName = ConsoleIO.nextLine("CREATE BRANCH DIRECTORIES AND SUB DIRECTORIES", "INPUT NEW BRANCH NAME", scanner);
-				if (inputBranchName.isEmpty()) {
-					System.err.println("NO BRANCH NAME >>> RE INPUT");
-					hasInput = false;
-				} else {
-					hasInput = true;
-				}
-			} while (!hasInput);
+			inputBranchName = ConsoleIO.nextLineExpectInput("CREATE BRANCH DIRECTORIES AND SUB DIRECTORIES", scanner);
+			
 			// 2. Create Directories
 			// 2.1. Check issue folder items
 			File issueDirectory = new File(Constants.CMS.BRANCHES_FOLDER);
@@ -93,10 +85,8 @@ public class CMS_NewBranch {
 			boolean bCloneDB = true;
 			if (!inputBranchName.isEmpty() && StringUtils.equalsIgnoreCase("N", inputBranchName)) {
 				bCloneDB = false;
-				System.out.println(">>> NO");
 			} else {
 				bCloneDB = true;
-				System.out.println(">>> YES");
 			}
 			// 4. Clone DB
 			if (bCloneDB) {

@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import utils.common.utils.ConsoleIO;
 import utils.common.utils.Constants;
 import utils.common.utils.DBManager;
-import utils.common.utils.ProcessManager;
 
 public class CloneDB {
 	

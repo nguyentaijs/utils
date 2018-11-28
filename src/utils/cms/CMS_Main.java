@@ -31,7 +31,7 @@ public class CMS_Main {
 				CMS_NewBranch.run();
 				break;
 			case "3":
-				CMS_CreateAssetBasedOnContentGroupId.run();
+				CMS_CreateAssetBasedOnXXX.run();
 				break;
 			case "4":
 				CMS_CreateAssets.run();

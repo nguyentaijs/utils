@@ -17,8 +17,10 @@ import utils.common.utils.ConsoleIO;
 import utils.common.utils.Constants;
 import utils.common.utils.DBManager;
 
-public class CMS_CreateAssetBasedOnContentGroupId {
+public class CMS_CreateAssetBasedOnXXX {
 	
+	private static String host, user, password, sourceDbName;
+
 	public static void main(String[] args) {
 		run();
 		ConsoleIO.showMessage("FINISH EXECUTION :)");
@@ -30,7 +32,11 @@ public class CMS_CreateAssetBasedOnContentGroupId {
 		File fileInput = null;
 		boolean isRemoteServer = false;
 		int exitValue = Integer.MIN_VALUE;
-		String sourcedbName = "";
+		String contentGroupId = "";
+		String type ="";
+		String key = "";
+		
+		
 		try {
 			
 			// 0.1: Remote server?
@@ -46,25 +52,42 @@ public class CMS_CreateAssetBasedOnContentGroupId {
 
 			// 1.1. Read user input target db name
 			if (isRemoteServer) {
-				exitValue = DBManager.showDB(Constants.REMOTE_HOST, Constants.LOCAL_USER, Constants.REMOTE_PASSWORD);
+				host = Constants.REMOTE_HOST;
+				user = Constants.REMOTE_USER;
+				password = Constants.REMOTE_PASSWORD;
 			} else {
-				exitValue = DBManager.showDB(Constants.LOCAL_HOST, Constants.LOCAL_USER, Constants.LOCAL_PASSWORD);
+				host = Constants.LOCAL_HOST;
+				user = Constants.LOCAL_USER;
+				password = Constants.LOCAL_PASSWORD;
 			}
+			exitValue = DBManager.showDB(host, user, password);
 			if (exitValue != 0) {
 				return;
 			}
 
-			sourcedbName = ConsoleIO.nextLineExpectInput("INPUT SOURCE DATABASE NAME", scanner);
+			sourceDbName = ConsoleIO.nextLineExpectInput("INPUT SOURCE DATABASE NAME", scanner);
 			
-			String contentGroupId = ConsoleIO.nextLineExpectInput("INPUT CONTENT GROUP ID", scanner);
-			ResultSet filePathResultSet = null;
-			if (isRemoteServer) {
-				filePathResultSet = getFilePathBasedOnContentGroupId(Constants.REMOTE_HOST, Constants.REMOTE_USER, Constants.REMOTE_PASSWORD,
-																		sourcedbName, contentGroupId);
-			} else {
-				filePathResultSet = getFilePathBasedOnContentGroupId(Constants.LOCAL_HOST, Constants.LOCAL_USER, Constants.LOCAL_PASSWORD,
-																		sourcedbName, contentGroupId);
+			showKeyMenu();
+			type = ConsoleIO.nextLineExpectInput("Select type | Default = Content group ID", scanner);
+			switch (type) {
+			case "1":
+				key = ConsoleIO.nextLineExpectInput("Input Content group Id", scanner);
+				contentGroupId = key;
+				break;
+			case "2":
+				key = ConsoleIO.nextLineExpectInput("Input Offer Id", scanner);
+				ResultSet contentGroupIds = getContentGrpIdByOfferId(key);
+				if(contentGroupIds.next()) {
+					contentGroupId = contentGroupIds.getString(1);
+				}
+				break;
+			default:
+				key = ConsoleIO.nextLineExpectInput("Input Content group Id", scanner);
+				contentGroupId = key;
+				break;
 			}
+			
+			ResultSet filePathResultSet = getFilePathBasedOnContentGroupId(contentGroupId);
 			List<String> filePathList = new ArrayList<>();
 			while (filePathResultSet.next()) {
 				filePathList.add(filePathResultSet.getString(1));
@@ -93,8 +116,19 @@ public class CMS_CreateAssetBasedOnContentGroupId {
 			scanner.close();
 		}
 	}
-	
-	private static ResultSet getFilePathBasedOnContentGroupId(String host, String user, String password, String sourceDbName, String contentGroupId) throws SQLException, ClassNotFoundException {
+
+	private static void showKeyMenu() {
+		String[] keys = new String[] {
+				"1. Content group Id",
+				"2. OfferId"
+		};
+		ConsoleIO.showMessage("MENU");
+		for (int i = 0; i < keys.length; i++) {
+			System.out.println(keys[i]);
+		}
+	}
+
+	private static ResultSet getFilePathBasedOnContentGroupId(String contentGroupId) throws SQLException, ClassNotFoundException {
 		Class.forName("com.mysql.jdbc.Driver");
 		Connection con = DriverManager.getConnection(String.format("jdbc:mysql://%s:3306/%s", host, sourceDbName), user, password);
 		Statement statement = con.createStatement();
@@ -120,5 +154,19 @@ public class CMS_CreateAssetBasedOnContentGroupId {
 		queryBuilder.append(" AND contentgrp.contentGroupId = %s                                                       ");
 		
 		return statement.executeQuery(String.format(queryBuilder.toString(), contentGroupId, contentGroupId));
+	}
+	
+	private static ResultSet getContentGrpIdByOfferId(String offerId) throws SQLException, ClassNotFoundException {
+		Class.forName("com.mysql.jdbc.Driver");
+		Connection con = DriverManager.getConnection(String.format("jdbc:mysql://%s:3306/%s", host, sourceDbName), user, password);
+		Statement statement = con.createStatement();
+		
+		StringBuilder queryBuilder = new StringBuilder();
+		queryBuilder.append(" SELECT cg.contentGroupId                                             ");
+		queryBuilder.append(" FROM offer o JOIN offercontentgroup ocg ON o.offerId = ocg.offerId   ");
+		queryBuilder.append(" JOIN contentgroup cg ON ocg.contentGroupId = cg.contentGroupId       ");
+		queryBuilder.append(" WHERE o.offerId = %s                                                 ");
+		
+		return statement.executeQuery(String.format(queryBuilder.toString(), offerId));
 	}
 }
